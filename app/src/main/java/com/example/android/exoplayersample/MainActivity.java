@@ -3,6 +3,7 @@ package com.example.android.exoplayersample;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -23,9 +24,12 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
 
-    public static final String VIDEO_URL = "http://clips.vorwaerts-gmbh.de/VfE_html5.mp4";
+    private static final String VIDEO_URL = "http://html5demos.com/assets/dizzy.mp4";
+    private static final String TAG = "ExoPlayer";
 
     private SimpleExoPlayer player;
 
@@ -34,25 +38,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SimpleExoPlayerView playerView = (SimpleExoPlayerView) findViewById(R.id.exoPlayerView);
+//        Get reference to simple player
+        SimpleExoPlayerView playerView = (SimpleExoPlayerView) findViewById(R.id.player_view);
 
-        // 1. Create a default TrackSelector
+//        Create a default TrackSelector
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory =
                 new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        // 2. Create a default LoadControl
+//        Create a default LoadControl
         LoadControl loadControl = new DefaultLoadControl();
 
-        // 3. Create the player
+//        Create the player
         player = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
 
-        // 4. Attach the player to the view
+//        Attach the player to the view
         playerView.setPlayer(player);
 
-        // 5. prepare and play
+//        prepare and play
         prepareAndPlay();
 
     }
@@ -61,12 +66,13 @@ public class MainActivity extends AppCompatActivity {
 
         Uri mp4VideoUri = Uri.parse(VIDEO_URL);
 
-        // Measures bandwidth during playback. Can be null if not required.
+        // Measures bandwidth during playback.
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
 
         // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this,
-                Util.getUserAgent(this, "exoPlayerSample"), bandwidthMeter);
+        String userAgent = Util.getUserAgent(this, "exoPlayerSample");
+        DataSource.Factory dataSourceFactory =
+                new DefaultDataSourceFactory(this, userAgent);
 
         // Produces Extractor instances for parsing the media data.
         ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
@@ -76,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 dataSourceFactory, extractorsFactory, null, null);
 
         // Prepare the player with the source.
-        player.setPlayWhenReady(true);
+        player.setPlayWhenReady(false);
         player.prepare(videoSource);
     }
 }
